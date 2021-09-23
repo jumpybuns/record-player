@@ -90,7 +90,7 @@ const arm = new THREE.Mesh(
 );
 
 arm.rotation.x = Math.PI / 2;
-arm.rotation.z = Math.PI / 7;
+arm.rotation.z = Math.PI / 7.01;
 arm.position.x = 2.25;
 arm.position.y = 3.1;
 arm.position.z = 1.25;
@@ -107,6 +107,30 @@ weight.position.y = 3.1;
 weight.position.z = 0.55;
 
 recordPlayer.add(base, record, arm, weight);
+
+// Amp
+
+const amp = new THREE.Group();
+scene.add(amp);
+
+const ampCase = new THREE.Mesh(
+  new THREE.BoxGeometry(2, 0.75, 1.75),
+  new THREE.MeshStandardMaterial({ roughness: 0.7, color: 0xff0000 })
+);
+ampCase.position.x = -1.5;
+ampCase.position.y = 2.85;
+ampCase.position.z = 1.5;
+
+const facePlate = new THREE.Mesh(
+  new THREE.PlaneGeometry(1.75, 0.6),
+  new THREE.MeshStandardMaterial({ roughness: 0.7, color: 0x00ffff })
+);
+
+facePlate.position.x = -1.5;
+facePlate.position.y = 2.9;
+facePlate.position.z = 2.4;
+
+amp.add(ampCase, facePlate);
 
 // Floor
 const floor = new THREE.Mesh(
@@ -191,6 +215,9 @@ const clock = new THREE.Clock();
 
 const tick = () => {
   const elapsedTime = clock.getElapsedTime();
+
+  // Update Record
+  record.rotation.z = elapsedTime;
 
   // Update controls
   controls.update();
