@@ -15,10 +15,22 @@ const canvas = document.querySelector("canvas.webgl");
 // Scene
 const scene = new THREE.Scene();
 
+// Fog
+const fog = new THREE.Fog("#262837", 1, 25);
+scene.fog = fog;
+
 /**
  * Textures
  */
 const textureLoader = new THREE.TextureLoader();
+const woodTexture = textureLoader.load("/textures/door/wood.jpg");
+const speakerTexture = textureLoader.load("/textures/door/speaker.jpg");
+const glassTexture = textureLoader.load("/textures/door/glass.jpg");
+const meterTexture = textureLoader.load("/textures/door/VU_Meter.jpg");
+const ampTexture = textureLoader.load("/textures/door/amp.jpg");
+const vinylTexture = textureLoader.load("/textures/door/vinyl.png");
+const blackTexture = textureLoader.load("/textures/door/black.png");
+const silverTexture = textureLoader.load("/textures/door/silver.jpg");
 
 /**
  * House
@@ -30,13 +42,13 @@ scene.add(desk);
 
 const back = new THREE.Mesh(
   new THREE.BoxGeometry(5, 3, 0.1),
-  new THREE.MeshStandardMaterial({ roughness: 0.7 })
+  new THREE.MeshStandardMaterial({ roughness: 0.7, map: woodTexture })
 );
 back.position.y = 1;
 
 const left = new THREE.Mesh(
   new THREE.BoxGeometry(3, 3, 0.1),
-  new THREE.MeshStandardMaterial({ roughness: 0.7 })
+  new THREE.MeshStandardMaterial({ roughness: 0.7, map: woodTexture })
 );
 left.position.y = 1;
 left.position.x = -2.5;
@@ -45,7 +57,7 @@ left.rotation.y = Math.PI / 2;
 
 const right = new THREE.Mesh(
   new THREE.BoxGeometry(3, 3, 0.1),
-  new THREE.MeshStandardMaterial({ roughness: 0.7 })
+  new THREE.MeshStandardMaterial({ roughness: 0.7, map: woodTexture })
 );
 right.position.x = 2.5;
 right.position.y = 1;
@@ -54,7 +66,7 @@ right.rotation.y = Math.PI / 2;
 
 const top = new THREE.Mesh(
   new THREE.BoxGeometry(6, 3, 0.1),
-  new THREE.MeshStandardMaterial({ roughness: 0.7 })
+  new THREE.MeshStandardMaterial({ roughness: 0.7, map: woodTexture })
 );
 top.rotation.x = Math.PI / 2;
 top.position.y = 2.5;
@@ -68,7 +80,7 @@ scene.add(recordPlayer);
 
 const base = new THREE.Mesh(
   new THREE.BoxGeometry(2.25, 0.3, 2.25),
-  new THREE.MeshStandardMaterial({ roughness: 0.7, color: 0xff0000 })
+  new THREE.MeshMatcapMaterial({ roughness: 0.7, matcap: blackTexture })
 );
 base.position.x = 1.7;
 base.position.y = 2.75;
@@ -76,7 +88,7 @@ base.position.z = 1.5;
 
 const record = new THREE.Mesh(
   new THREE.TorusGeometry(0.45, 0.4, 2.9, 89, 6.3),
-  new THREE.MeshStandardMaterial({ color: 0x00ff00 })
+  new THREE.MeshStandardMaterial({ map: vinylTexture })
 );
 
 record.rotation.x = Math.PI / 2;
@@ -84,9 +96,12 @@ record.position.x = 1.5;
 record.position.y = 3;
 record.position.z = 1.5;
 
+vinylTexture.wrapS = THREE.RepeatWrapping;
+vinylTexture.wrapT = THREE.RepeatWrapping;
+
 const arm = new THREE.Mesh(
   new THREE.CylinderGeometry(0.05, 0.05, 1.75, 64, 1),
-  new THREE.MeshStandardMaterial({ color: 0x0000ff })
+  new THREE.MeshMatcapMaterial({ roughness: 0.7, matcap: blackTexture })
 );
 
 arm.rotation.x = Math.PI / 2;
@@ -97,7 +112,7 @@ arm.position.z = 1.25;
 
 const weight = new THREE.Mesh(
   new THREE.CylinderGeometry(0.1, 0.1, 0.05, 64, 1),
-  new THREE.MeshStandardMaterial({ color: 0xff00ff })
+  new THREE.MeshMatcapMaterial({ roughness: 0.7, matcap: silverTexture })
 );
 
 weight.rotation.x = Math.PI / 2;
@@ -115,7 +130,7 @@ scene.add(amp);
 
 const ampCase = new THREE.Mesh(
   new THREE.BoxGeometry(2, 0.75, 1.75),
-  new THREE.MeshStandardMaterial({ roughness: 0.7, color: 0xff0000 })
+  new THREE.MeshStandardMaterial({ roughness: 0.7, map: ampTexture })
 );
 ampCase.position.x = -1.5;
 ampCase.position.y = 2.85;
@@ -123,14 +138,78 @@ ampCase.position.z = 1.5;
 
 const facePlate = new THREE.Mesh(
   new THREE.PlaneGeometry(1.75, 0.6),
-  new THREE.MeshStandardMaterial({ roughness: 0.7, color: 0x00ffff })
+  new THREE.MeshStandardMaterial({ roughness: 0.7, map: glassTexture })
 );
 
 facePlate.position.x = -1.5;
 facePlate.position.y = 2.9;
 facePlate.position.z = 2.4;
 
-amp.add(ampCase, facePlate);
+const meterLeft = new THREE.Mesh(
+  new THREE.PlaneGeometry(0.6, 0.3),
+  new THREE.MeshStandardMaterial({ roughness: 0.7, map: meterTexture })
+);
+meterLeft.position.set(-1.9, 3, 2.41);
+
+const meterRight = new THREE.Mesh(
+  new THREE.PlaneGeometry(0.6, 0.3),
+  new THREE.MeshStandardMaterial({ roughness: 0.7, map: meterTexture })
+);
+meterRight.position.set(-1.1, 3, 2.41);
+
+amp.add(ampCase, facePlate, meterLeft, meterRight);
+
+// Speakers
+const leftSpeaker = new THREE.Group();
+scene.add(leftSpeaker);
+
+const leftSpeakerBox = new THREE.Mesh(
+  new THREE.BoxGeometry(1, 4, 2),
+  new THREE.MeshStandardMaterial({ map: speakerTexture })
+);
+
+leftSpeakerBox.position.x = -4.5;
+leftSpeakerBox.position.y = 1.5;
+leftSpeakerBox.position.z = 1;
+
+const coneGeometry = new THREE.TorusGeometry(0.05, 0.4, 2.9, 89, 6.3);
+const coneMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
+
+const coneL1 = new THREE.Mesh(coneGeometry, coneMaterial);
+coneL1.scale.set(0.6, 0.6);
+coneL1.position.set(-4.5, 2.75, 2.01);
+const coneL2 = new THREE.Mesh(coneGeometry, coneMaterial);
+coneL2.scale.set(0.6, 0.6);
+coneL2.position.set(-4.5, 2, 2.01);
+const coneL3 = new THREE.Mesh(coneGeometry, coneMaterial);
+coneL3.scale.set(0.6, 0.6);
+coneL3.position.set(-4.5, 1.25, 2.01);
+
+leftSpeaker.add(coneL1, coneL2, coneL3, leftSpeakerBox);
+
+const rightSpeaker = new THREE.Group();
+scene.add(rightSpeaker);
+
+const rightSpeakerBox = new THREE.Mesh(
+  new THREE.BoxGeometry(1, 4, 2),
+  new THREE.MeshStandardMaterial({ map: speakerTexture })
+);
+
+rightSpeakerBox.position.x = 4.5;
+rightSpeakerBox.position.y = 1.5;
+rightSpeakerBox.position.z = 1;
+
+const coneR1 = new THREE.Mesh(coneGeometry, coneMaterial);
+coneR1.scale.set(0.6, 0.6);
+coneR1.position.set(4.5, 2.75, 2.01);
+const coneR2 = new THREE.Mesh(coneGeometry, coneMaterial);
+coneR2.scale.set(0.6, 0.6);
+coneR2.position.set(4.5, 2, 2.01);
+const coneR3 = new THREE.Mesh(coneGeometry, coneMaterial);
+coneR3.scale.set(0.6, 0.6);
+coneR3.position.set(4.5, 1.25, 2.01);
+
+rightSpeaker.add(coneR1, coneR2, coneR3, rightSpeakerBox);
 
 // Floor
 const floor = new THREE.Mesh(
@@ -157,6 +236,11 @@ gui.add(moonLight.position, "x").min(-5).max(5).step(0.001);
 gui.add(moonLight.position, "y").min(-5).max(5).step(0.001);
 gui.add(moonLight.position, "z").min(-5).max(5).step(0.001);
 scene.add(moonLight);
+
+const doorLight = new THREE.PointLight("#ff7d46", 1, 7);
+doorLight.position.set(0, 2.2, 2.7);
+
+desk.add(doorLight);
 
 /**
  * Sizes
@@ -207,6 +291,22 @@ const renderer = new THREE.WebGLRenderer({
 });
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setClearColor("#262837");
+
+/**
+ *  Shadows
+ */
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+moonLight.castShadow = true;
+doorLight.castShadow = true;
+
+desk.castShadow = true;
+leftSpeaker.castShadow = true;
+rightSpeaker.castShadow = true;
+
+floor.receiveShadow = true;
 
 /**
  * Animate
@@ -217,7 +317,10 @@ const tick = () => {
   const elapsedTime = clock.getElapsedTime();
 
   // Update Record
-  record.rotation.z = elapsedTime;
+  record.rotation.z = elapsedTime * 3.3;
+
+  // Update Cone
+  //   coneL1.position.z = coneL1.position.z + Math.cos(elapsedTime * 50);
 
   // Update controls
   controls.update();
